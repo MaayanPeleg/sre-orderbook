@@ -18,7 +18,7 @@ pipeline {
 
       }
     }
-    stage('Skip DB build if DB exoists') {
+    stage('Creating config.json For DB As DB Exists') {
       when {
         expression { fileExists('nodb') }
       }

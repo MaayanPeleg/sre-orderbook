@@ -7,10 +7,25 @@ pipeline {
   }
   stages {
     stage('Build and Publish DB') {
+      when {
+        expression { !(fileExists('nodb')) }
+      }
       steps {
         container(name: 'kaniko') {
           sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json
-/kaniko/executor -f `pwd`/compose/Dockerfile.db -c `pwd` --insecure --skip-tls-verify --cache=false --destination=${ECR_REPO}:${JOB_NAME}db-dev-${BUILD_NUMBER}'''
+          /kaniko/executor -f `pwd`/compose/Dockerfile.db -c `pwd` --insecure --skip-tls-verify --cache=false --destination=${ECR_REPO}:${JOB_NAME}db-dev-${BUILD_NUMBER}'''
+        }
+
+      }
+    }
+    stage('Skip DB build if DB exoists') {
+      when {
+        expression { fileExists('nodb') }
+      }
+      steps {
+        container(name: 'kaniko') {
+          sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json'''
+          if (!(fileExists('nodb'))){sh'''/kaniko/executor -f `pwd`/compose/Dockerfile.db -c `pwd` --insecure --skip-tls-verify --cache=false --destination=${ECR_REPO}:${JOB_NAME}db-dev-${BUILD_NUMBER}'''
         }
 
       }
@@ -18,8 +33,7 @@ pipeline {
     stage('Build and Publish API') {
       steps {
         container(name: 'kaniko') {
-          sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json'''
-if (!(fileExists('nodb'))){sh'''
+          sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json
 /kaniko/executor -f `pwd`/compose/Dockerfile.api -c `pwd` --insecure --skip-tls-verify --cache=false --destination=${ECR_REPO}:${JOB_NAME}api-dev-${BUILD_NUMBER}'''
 		}
         }

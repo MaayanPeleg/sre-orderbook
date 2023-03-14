@@ -38,7 +38,6 @@ pipeline {
 		}
         }
       }
-    }
     stage('Build Trading Client') {
       steps {
         container(name: 'kaniko') {

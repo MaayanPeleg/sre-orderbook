@@ -24,8 +24,7 @@ pipeline {
       }
       steps {
         container(name: 'kaniko') {
-          sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json
-          /kaniko/executor -f `pwd`/compose/Dockerfile.db -c `pwd` --insecure --skip-tls-verify --cache=false --destination=${ECR_REPO}:${JOB_NAME}db-dev-${BUILD_NUMBER}'''
+          sh '''echo \'{ "credsStore": "ecr-login" }\' > /kaniko/.docker/config.json'''
           }
       }
     }
